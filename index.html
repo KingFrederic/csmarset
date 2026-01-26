@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHELSEA SMARTSET | The Digital Atelier</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&f[]=clash-display@200,400,600,700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Satoshi', 'sans-serif'], display: ['Clash Display', 'sans-serif'] },
+                    colors: { 'pure-black': '#050505', 'pure-white': '#ffffff' },
+                    animation: { 'marquee': 'marquee 35s linear infinite' },
+                    keyframes: { marquee: { '0%': { transform: 'translateX(0%)' }, '100%': { transform: 'translateX(-100%)' } } }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { transition: background-color 0.6s ease, color 0.6s ease; cursor: none; overflow-x: hidden; }
+        #cursor { position: fixed; top: 0; left: 0; width: 12px; height: 12px; background: white; border-radius: 50%; pointer-events: none; mix-blend-mode: difference; z-index: 9999; transition: transform 0.1s ease-out; }
+        ::-webkit-scrollbar { width: 0px; }
+        .hero-gradient { background: linear-gradient(to bottom, rgba(5,5,5,0) 0%, rgba(5,5,5,0.9) 100%); }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-left: 1px solid rgba(255, 255, 255, 0.1); }
+        .slide-zoom { animation: slowZoom 8s infinite alternate ease-in-out; }
+        @keyframes slowZoom { from { transform: scale(1); } to { transform: scale(1.15); } }
+    </style>
+</head>
+<body class="dark bg-pure-black text-white selection:bg-zinc-500">
+
+    <div id="cursor"></div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const PRODUCTS = [
+            { id: 1, name: "Silk Empress Set", price: 95000, tag: "ESSENTIAL", img: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=1200" },
+            { id: 2, name: "Noir Blazer Dress", price: 110000, tag: "NEW SEASON", img: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1200" },
+            { id: 3, name: "Onyx Evening Gown", price: 150000, tag: "LIMITED", img: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=1200" },
+            { id: 4, name: "Satin Power Suit", price: 125000, tag: "BESTSELLER", img: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=1200" },
+            { id: 5, name: "Luxe Wrap Dress", price: 85000, tag: "PREMIUM", img: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1200" },
+            { id: 6, name: "Gold Adire Ensemble", price: 105000, tag: "SIGNATURE", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200" },
+            { id: 1, name: "Silk Empress Set", price: 95000, tag: "ESSENTIAL", img: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=1200" },
+            { id: 2, name: "Noir Blazer Dress", price: 110000, tag: "NEW SEASON", img: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1200" },
+            { id: 3, name: "Onyx Evening Gown", price: 150000, tag: "LIMITED", img: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=1200" },
+            { id: 4, name: "Satin Power Suit", price: 125000, tag: "BESTSELLER", img: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=1200" },
+            { id: 5, name: "Luxe Wrap Dress", price: 85000, tag: "PREMIUM", img: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1200" },
+            { id: 6, name: "Gold Adire Ensemble", price: 105000, tag: "SIGNATURE", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200" },
+            { id: 1, name: "Silk Empress Set", price: 95000, tag: "ESSENTIAL", img: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=1200" },
+            { id: 2, name: "Noir Blazer Dress", price: 110000, tag: "NEW SEASON", img: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1200" },
+            { id: 3, name: "Onyx Evening Gown", price: 150000, tag: "LIMITED", img: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=1200" },
+            { id: 4, name: "Satin Power Suit", price: 125000, tag: "BESTSELLER", img: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=1200" },
+            { id: 5, name: "Luxe Wrap Dress", price: 85000, tag: "PREMIUM", img: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1200" },
+            { id: 6, name: "Gold Adire Ensemble", price: 105000, tag: "SIGNATURE", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200" },
+            { id: 1, name: "Silk Empress Set", price: 95000, tag: "ESSENTIAL", img: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=1200" },
+            { id: 2, name: "Noir Blazer Dress", price: 110000, tag: "NEW SEASON", img: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1200" },
+            { id: 3, name: "Onyx Evening Gown", price: 150000, tag: "LIMITED", img: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=1200" },
+            { id: 4, name: "Satin Power Suit", price: 125000, tag: "BESTSELLER", img: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=1200" },
+            { id: 5, name: "Luxe Wrap Dress", price: 85000, tag: "PREMIUM", img: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1200" },
+            { id: 6, name: "Gold Adire Ensemble", price: 105000, tag: "SIGNATURE", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200" },
+            { id: 1, name: "Silk Empress Set", price: 95000, tag: "ESSENTIAL", img: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=1200" },
+            { id: 2, name: "Noir Blazer Dress", price: 110000, tag: "NEW SEASON", img: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1200" },
+            { id: 3, name: "Onyx Evening Gown", price: 150000, tag: "LIMITED", img: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=1200" },
+            { id: 4, name: "Satin Power Suit", price: 125000, tag: "BESTSELLER", img: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=1200" },
+            { id: 5, name: "Luxe Wrap Dress", price: 85000, tag: "PREMIUM", img: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1200" },
+            { id: 6, name: "Gold Adire Ensemble", price: 105000, tag: "SIGNATURE", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200" },
+            { id: 1, name: "Silk Empress Set", price: 95000, tag: "ESSENTIAL", img: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=1200" },
+            { id: 2, name: "Noir Blazer Dress", price: 110000, tag: "NEW SEASON", img: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1200" },
+            { id: 3, name: "Onyx Evening Gown", price: 150000, tag: "LIMITED", img: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=1200" },
+            { id: 4, name: "Satin Power Suit", price: 125000, tag: "BESTSELLER", img: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=1200" },
+            { id: 5, name: "Luxe Wrap Dress", price: 85000, tag: "PREMIUM", img: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1200" },
+            { id: 6, name: "Gold Adire Ensemble", price: 105000, tag: "SIGNATURE", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200" },
+        ];
+        
+
+        const HERO_SLIDES = [
+            { img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070", title: "MODERN", sub: "FEMME" },
+            { img: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070", title: "ATELIER", sub: "2026" },
+            { img: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070", title: "SILK", sub: "LUXURY" }
+        ];
+
+        const App = () => {
+            const [isDark, setIsDark] = useState(true);
+            const [cart, setCart] = useState([]);
+            const [cartOpen, setCartOpen] = useState(false);
+            const [currentSlide, setCurrentSlide] = useState(0);
+
+            useEffect(() => {
+                const cursor = document.getElementById('cursor');
+                const moveCursor = (e) => {
+                    cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px) scale(${cartOpen ? 4 : 1})`;
+                };
+                window.addEventListener('mousemove', moveCursor);
+                lucide.createIcons();
+                
+                const slideInterval = setInterval(() => {
+                    setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+                }, 6000);
+
+                return () => {
+                    window.removeEventListener('mousemove', moveCursor);
+                    clearInterval(slideInterval);
+                };
+            }, [cartOpen]);
+
+            const total = cart.reduce((a, b) => a + b.price, 0);
+
+            return (
+                <div className={`transition-colors duration-500 ${isDark ? 'bg-pure-black text-white' : 'bg-pure-white text-black'}`}>
+                    
+                    {/* Header */}
+                    <nav className="fixed top-0 w-full p-6 md:p-8 flex justify-between items-center z-50 mix-blend-difference">
+                        <h1 className="text-xl md:text-2xl font-display font-bold tracking-tighter text-white uppercase">Chelsea Smartset</h1>
+                        <div className="flex items-center gap-4 md:gap-6">
+                            <a href="https://wa.me/2349069133312" target="_blank" className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest bg-white/10 px-4 py-2 rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all">
+                                <i data-lucide="phone" size={10}></i> <span className="hidden sm:inline">Concierge</span>
+                            </a>
+                            <button onClick={() => setIsDark(!isDark)} className="p-2 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all">
+                                {isDark ? <i data-lucide="sun" size={16}></i> : <i data-lucide="moon" size={16}></i>}
+                            </button>
+                            <button onClick={() => setCartOpen(true)} className="group flex items-center gap-2 text-white">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Bag</span>
+                                <span className="w-6 h-6 rounded-full bg-white text-black text-[10px] flex items-center justify-center font-bold">{cart.length}</span>
+                            </button>
+                        </div>
+                    </nav>
+
+                    {/* Satisfying Slide Show Hero */}
+                    <div className="relative h-screen w-full overflow-hidden bg-black">
+                        {HERO_SLIDES.map((slide, idx) => (
+                            <div key={idx} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentSlide ? 'opacity-100' : 'opacity-0'}`}>
+                                <img src={slide.img} className="absolute inset-0 w-full h-full object-cover opacity-60 slide-zoom" alt="Hero Slide" />
+                                <div className="absolute inset-0 z-20 hero-gradient"></div>
+                                <div className="relative z-30 h-full flex flex-col items-center justify-center text-center px-6">
+                                    <h1 className="text-[15vw] md:text-[10vw] leading-none font-display font-bold uppercase tracking-tighter text-white animate-pulse">
+                                        {slide.title}<br/>{slide.sub}
+                                    </h1>
+                                    <p className="mt-6 text-zinc-400 max-w-md mx-auto text-sm md:text-base font-light italic tracking-wide">Defining African luxury for the global woman.</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Marquee */}
+                    <div className={`py-10 border-y overflow-hidden whitespace-nowrap ${isDark ? 'border-white/10 bg-white text-black' : 'border-black/10 bg-black text-white'}`}>
+                        <div className="animate-marquee flex gap-20">
+                            {[1,2,3,4,5].map(i => (
+                                <p key={i} className="text-5xl font-display font-bold uppercase italic tracking-tighter">Chelsea Smartset 2026 — Worldwide Delivery — Chelsea Smartset 2026 — Worldwide Delivery</p>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Product Grid */}
+                    <section id="shop" className="max-w-[1600px] mx-auto px-6 md:px-20 py-24">
+                        <h2 className="text-4xl md:text-6xl font-display font-bold uppercase tracking-tighter italic mb-16">The Collection</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
+                            {PRODUCTS.map(p => (
+                                <div key={p.id} className="group cursor-pointer">
+                                    <div className="relative aspect-[4/5] overflow-hidden bg-zinc-900 border border-white/5">
+                                        <img src={p.img} className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 grayscale group-hover:grayscale-0" />
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                                            <button onClick={() => {setCart([...cart, p]); setCartOpen(true);}} className="px-8 py-4 bg-white text-black text-[10px] font-bold uppercase tracking-widest shadow-2xl">Add to Bag</button>
+                                        </div>
+                                    </div>
+                                    <div className="mt-6 flex justify-between items-start">
+                                        <div>
+                                            <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 mb-2">{p.tag}</p>
+                                            <h3 className="text-xl font-display uppercase font-bold">{p.name}</h3>
+                                        </div>
+                                        <span className="text-xl font-display font-medium">₦{p.price.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                    
+                 
+
+                    {/* Footer */}
+                    <footer className="py-20 px-6 border-t border-white/5 text-center">
+                        <div className="flex flex-col items-center gap-10">
+                            <h2 className="text-4xl md:text-8xl font-display font-bold tracking-tighter opacity-10 uppercase italic">Chelsea Smartset</h2>
+                            <div className="flex flex-wrap justify-center gap-12">
+                                <a href="https://www.instagram.com/csmartset/" target="_blank" className="group text-[10px] font-black uppercase tracking-[0.3em] flex flex-col items-center">
+                                    Instagram
+                                    <span className="w-0 h-[1px] bg-current group-hover:w-full transition-all duration-500"></span>
+                                </a>
+                                <a href="https://wa.me/2349069133312" target="_blank" className="group text-[10px] font-black uppercase tracking-[0.3em] flex flex-col items-center text-green-500">
+                                    Contact Us (WhatsApp)
+                                    <span className="w-0 h-[1px] bg-current group-hover:w-full transition-all duration-500"></span>
+                                </a>
+                            </div>
+                            <p className="text-[9px] uppercase tracking-[0.5em] text-zinc-600">We deliver worldwide — Crafted for the modern icon</p>
+                        </div>
+                    </footer>
+
+                    {/* GLASS CART PANEL */}
+                    <div className={`fixed inset-0 z-[60] flex justify-end transition-all duration-700 ${cartOpen ? 'visible' : 'invisible'}`}>
+                        <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-700 ${cartOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setCartOpen(false)}></div>
+                        <div className={`relative w-full max-w-lg h-full p-8 md:p-12 flex flex-col glass-panel transition-transform duration-700 ${cartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                            <div className="flex justify-between items-center mb-10 text-white">
+                                <h2 className="text-3xl font-display font-bold uppercase tracking-tighter">Your Bag</h2>
+                                <button onClick={() => setCartOpen(false)} className="hover:rotate-90 transition-transform"><i data-lucide="x"></i></button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto space-y-8">
+                                {cart.length === 0 && <p className="text-center text-zinc-500 uppercase text-[10px] py-10 tracking-widest">Your bag is empty</p>}
+                                {cart.map((item, idx) => (
+                                    <div key={idx} className="flex gap-6 items-center text-white">
+                                        <img src={item.img} className="w-20 h-24 object-cover" />
+                                        <div className="flex-1">
+                                            <h4 className="text-[10px] font-black uppercase tracking-widest">{item.name}</h4>
+                                            <p className="text-sm opacity-50">₦{item.price.toLocaleString()}</p>
+                                            <button onClick={() => setCart(cart.filter((_, i) => i !== idx))} className="text-[10px] text-red-500 mt-2 hover:underline">Remove</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-auto pt-8 border-t border-white/10 text-white">
+                                <div className="flex justify-between text-2xl font-display font-bold mb-6">
+                                    <span className="text-sm opacity-50 uppercase tracking-widest">Total</span>
+                                    <span>₦{total.toLocaleString()}</span>
+                                </div>
+                                <button className="w-full py-5 bg-white text-black text-xs font-black uppercase tracking-[0.3em] hover:scale-[1.02] transition-transform shadow-2xl">Secure Checkout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
